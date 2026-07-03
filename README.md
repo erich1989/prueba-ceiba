@@ -4,6 +4,7 @@ API REST y frontend web para gestionar inventario, alertas de stock bajo y órde
 
 ## Demo desplegada
 
+- **Frontend:** https://prueba-ceiba-frontend.onrender.com
 - **API:** https://prueba-ceiba-mercadoexpress.onrender.com
 - **Health check:** https://prueba-ceiba-mercadoexpress.onrender.com/api-v1/health
 
