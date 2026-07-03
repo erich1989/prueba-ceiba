@@ -47,6 +47,18 @@ app.use(globalRateLimiter);
 
 routerApi(app);
 
+if (process.env.NODE_ENV !== 'production') {
+  const swaggerUi = require('swagger-ui-express');
+  const openapiSpec = require('./docs/openapi');
+  app.use(
+    '/api-docs',
+    helmet({ contentSecurityPolicy: false }),
+    swaggerUi.serve,
+    swaggerUi.setup(openapiSpec, { customSiteTitle: 'MercadoExpress API Docs' }),
+  );
+  console.log('✓ Swagger UI disponible en /api-docs (solo desarrollo)');
+}
+
 app.get('/', (req, res) => {
   res.send('✓ MercadoExpress Inventory API running successfully.');
 });

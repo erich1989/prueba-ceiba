@@ -1,35 +1,34 @@
 # MercadoExpress — Sistema de Gestión de Inventario
 
-API REST y frontend web para gestionar inventario, alertas de stock bajo y órdenes de compra a proveedores.
+API REST para gestionar inventario, alertas de stock bajo y órdenes de compra a proveedores.
+
+Este repositorio contiene:
+
+- **Parte 1 — API REST** (`backend/`): la solución de la prueba técnica. Es autosuficiente y funciona por completo sin frontend (consumible vía HTTP/Postman/cURL).
+- **Parte 2 — Frontend web** (`frontend/`): interfaz opcional que consume la API, incluida como valor agregado.
 
 ## Demo desplegada
 
-- **Frontend:** https://prueba-ceiba-frontend.onrender.com
 - **API:** https://prueba-ceiba-mercadoexpress.onrender.com
 - **Health check:** https://prueba-ceiba-mercadoexpress.onrender.com/api-v1/health
+- **Frontend (plus):** https://prueba-ceiba-frontend.onrender.com
 
-> Nota: el servicio usa el plan gratuito de Render, por lo que la primera petición tras un periodo de inactividad puede tardar ~30-50s en responder mientras el servicio se reactiva.
+---
+
+# Parte 1 — API REST (la prueba)
 
 ## Tecnologías
-
-**Backend**
 
 - Node.js + Express
 - MongoDB + Mongoose
 - JWT para autenticación en mutaciones
 - Jest + Supertest + MongoDB Memory Server
 
-**Frontend** (`frontend/`)
-
-- Next.js 16 (App Router) + TypeScript
-- Material UI (MUI) + Atomic Design
-- Axios + JWT en localStorage
-
-Ver [`frontend/README.md`](frontend/README.md) para instrucciones del frontend.
-
 ## Arquitectura
 
-Arquitectura por componentes en capas:
+El proyecto sigue una **arquitectura en capas modular por componentes** (también conocida como *modular monolith* con *layered / feature-based architecture*): un único servicio desplegable, organizado por componente de dominio, donde cada componente separa sus responsabilidades en capas.
+
+Cada componente en `src/components/<recurso>/` separa:
 
 - `network.js` — rutas HTTP, validación básica y respuestas
 - `controller.js` — reglas de negocio
@@ -46,6 +45,8 @@ Componentes principales:
 
 ## Ejecución local
 
+Ejecuta estos comandos en la terminal de tu preferencia (bash, zsh, PowerShell, la integrada de tu IDE, etc.), desde la raíz del proyecto:
+
 ```bash
 cd backend
 cp .env.example .env
@@ -56,17 +57,6 @@ npm run dev
 
 La API queda en `http://localhost:6002`.
 
-### Frontend
-
-```bash
-cd frontend
-cp .env.example .env.local
-npm install
-npm run dev
-```
-
-La app queda en `http://localhost:3000` (puerto requerido por CORS del backend en producción).
-
 Variables clave en `.env`:
 
 - `PORT`
@@ -76,20 +66,20 @@ Variables clave en `.env`:
 
 ## Endpoints principales
 
-| Método | Ruta | Auth | Descripción |
-|--------|------|------|-------------|
-| GET | `/api-v1/health` | No | Health check |
-| GET | `/api-v1/categories` | No | Categorías válidas |
-| GET/POST/PUT/DELETE | `/api-v1/products` | POST/PUT/DELETE sí | CRUD de productos |
-| POST | `/api-v1/products/:id/ajustar` | Sí | Ajuste ENTRADA/SALIDA |
-| GET | `/api-v1/products/:id/movimientos` | No | Historial de movimientos |
-| GET | `/api-v1/alerts` | No | Consulta de alertas |
-| GET/POST | `/api-v1/purchase-orders` | POST sí | Órdenes de compra |
-| POST | `/api-v1/purchase-orders/:id/aprobar` | Sí | Aprobar orden |
-| POST | `/api-v1/purchase-orders/:id/rechazar` | Sí | Rechazar orden |
-| POST | `/api-v1/purchase-orders/:id/recibir` | Sí | Recibir orden |
-| POST | `/api-v1/users/register` | No | Registrar admin |
-| POST | `/api-v1/users/login` | No | Obtener JWT |
+| Método             | Ruta                                   | Auth                | Descripción             |
+| --------------------- | ---------------------------------------- | --------------------- | -------------------------- |
+| GET                 | `/api-v1/health`                       | No                  | Health check             |
+| GET                 | `/api-v1/categories`                   | No                  | Categorías válidas     |
+| GET/POST/PUT/DELETE | `/api-v1/products`                     | POST/PUT/DELETE sí | CRUD de productos        |
+| POST                | `/api-v1/products/:id/ajustar`         | Sí                 | Ajuste ENTRADA/SALIDA    |
+| GET                 | `/api-v1/products/:id/movimientos`     | No                  | Historial de movimientos |
+| GET                 | `/api-v1/alerts`                       | No                  | Consulta de alertas      |
+| GET/POST            | `/api-v1/purchase-orders`              | POST sí            | Órdenes de compra       |
+| POST                | `/api-v1/purchase-orders/:id/aprobar`  | Sí                 | Aprobar orden            |
+| POST                | `/api-v1/purchase-orders/:id/rechazar` | Sí                 | Rechazar orden           |
+| POST                | `/api-v1/purchase-orders/:id/recibir`  | Sí                 | Recibir orden            |
+| POST                | `/api-v1/users/register`               | No                  | Registrar admin          |
+| POST                | `/api-v1/users/login`                  | No                  | Obtener JWT              |
 
 ## Tests
 
@@ -137,3 +127,81 @@ Tras el seed, los productos con stock bajo generan alertas `ACTIVA` automáticam
 6. Tras el deploy, ejecuta el seed una vez (local apuntando a la misma DB o vía script manual).
 
 Health check: `GET /api-v1/health`
+
+## Documentación interactiva (Swagger)
+
+En **desarrollo local**, la API expone documentación interactiva con Swagger UI:
+
+- **URL:** http://localhost:6002/api-docs
+- Permite explorar todos los endpoints, ver schemas y probar peticiones (botón **Authorize** para el JWT).
+
+**Importante:** Swagger está disponible **únicamente en entorno de desarrollo**. En producción queda deshabilitado de forma intencional (seguridad: no exponer documentación interactiva ni pruebas contra la API pública).
+
+Se controla con la variable `NODE_ENV`:
+
+| Entorno | `NODE_ENV` | `/api-docs` |
+|---------|------------|-------------|
+| Local (`npm run dev`) | vacío o `development` | Activo |
+| Render (producción) | `production` | No montado (404) |
+
+---
+
+# Parte 2 — Frontend web (plus)
+
+Interfaz web opcional construida como valor agregado. **No es necesaria para usar la API**: la Parte 1 funciona de forma independiente (Postman, cURL, Swagger en local, etc.). El frontend ofrece una capa visual sobre los mismos endpoints de la API.
+
+- **Demo:** https://prueba-ceiba-frontend.onrender.com
+- **Código:** carpeta [`frontend/`](frontend/)
+
+## Tecnologías
+
+- Next.js 16 (App Router) + TypeScript
+- Material UI (MUI) + Atomic Design (`atoms` → `molecules` → `organisms` → `templates`)
+- Axios + JWT en `localStorage`
+- Fetching client-side (`'use client'`); no SSR autenticado
+
+## Autenticación y acceso
+
+El flujo de sesión es el siguiente:
+
+1. **`/login`** — el usuario ingresa email y contraseña. Se llama a `POST /api-v1/users/login`; la API devuelve `{ token, user }`.
+2. **`AuthContext`** — guarda el JWT y el usuario en `localStorage`. Un interceptor de Axios inyecta `Authorization: Bearer <token>` en cada petición.
+3. **`ProtectedRoute`** — envuelve el dashboard. Si no hay sesión, redirige a `/login`.
+4. **`/`** — redirige a `/products` (con sesión) o `/login` (sin sesión).
+5. **`/register`** — crea un usuario admin vía `POST /api-v1/users/register` e inicia sesión automáticamente.
+6. **Salir** — borra token y usuario de `localStorage` y vuelve al login.
+
+Credenciales de prueba (tras `npm run seed` en el backend):
+
+- Email: `admin@mercadoexpress.com`
+- Password: `Admin1234!`
+
+## Páginas del dashboard
+
+Todas las rutas del panel están bajo el layout protegido con barra lateral y topbar (`DashboardLayout`):
+
+| Ruta | Funcionalidad |
+|------|----------------|
+| `/products` | Listado con filtros (categoría, proveedor, rango de stock, alerta activa). Crear, editar y eliminar productos. |
+| `/inventory` | Seleccionar producto, ajustar stock (`ENTRADA` / `SALIDA`) y ver historial de movimientos inmutables. |
+| `/alerts` | Consultar alertas `STOCK_BAJO` filtradas por estado `ACTIVA` o `RESUELTA`. |
+| `/purchase-orders` | Crear órdenes de compra, aprobar, rechazar (motivo ≥ 10 caracteres) y recibir (incrementa stock y cierra alerta). |
+
+Cada página consume los servicios en `frontend/src/services/` (`products`, `inventory`, `alerts`, `purchaseOrders`, `auth`), que desempaquetan el envelope `{ status, error, response }` de la API.
+
+## Ejecución local
+
+```bash
+cd frontend
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+La app queda en `http://localhost:3000` (puerto requerido por CORS del backend en producción).
+
+Variable de entorno:
+
+- `NEXT_PUBLIC_API_URL` — URL base de la API (default: la instancia desplegada en Render)
+
+Ver [`frontend/README.md`](frontend/README.md) para estructura de carpetas y más detalle técnico.
