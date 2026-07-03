@@ -18,6 +18,13 @@ const allowedOrigins = [
   'http://localhost:4002',
 ];
 
+if (process.env.CORS_ORIGINS) {
+  process.env.CORS_ORIGINS.split(',')
+    .map((o) => o.trim())
+    .filter(Boolean)
+    .forEach((origin) => allowedOrigins.push(origin));
+}
+
 const corsOptions = {
   origin(origin, callback) {
     if (!origin) return callback(null, true);

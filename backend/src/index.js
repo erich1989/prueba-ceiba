@@ -8,6 +8,7 @@ if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'supersecretjwtsecretk
 
 const connectDb = require('./libs/mongoose');
 const app = require('./app');
+const { startKeepAlive } = require('./jobs/keepAlive');
 
 async function initializeMongoDB() {
   try {
@@ -22,4 +23,5 @@ initializeMongoDB();
 const PORT = process.env.PORT || 6002;
 app.listen(PORT, () => {
   console.log(`✓ Server running on port ${PORT}`);
+  startKeepAlive();
 });

@@ -1,20 +1,30 @@
 # MercadoExpress — Sistema de Gestión de Inventario
 
-API REST para gestionar inventario, alertas de stock bajo y órdenes de compra a proveedores.
+API REST y frontend web para gestionar inventario, alertas de stock bajo y órdenes de compra a proveedores.
 
 ## Demo desplegada
 
-- **URL:** https://prueba-ceiba-mercadoexpress.onrender.com
+- **API:** https://prueba-ceiba-mercadoexpress.onrender.com
 - **Health check:** https://prueba-ceiba-mercadoexpress.onrender.com/api-v1/health
 
 > Nota: el servicio usa el plan gratuito de Render, por lo que la primera petición tras un periodo de inactividad puede tardar ~30-50s en responder mientras el servicio se reactiva.
 
 ## Tecnologías
 
+**Backend**
+
 - Node.js + Express
 - MongoDB + Mongoose
 - JWT para autenticación en mutaciones
 - Jest + Supertest + MongoDB Memory Server
+
+**Frontend** (`frontend/`)
+
+- Next.js 16 (App Router) + TypeScript
+- Material UI (MUI) + Atomic Design
+- Axios + JWT en localStorage
+
+Ver [`frontend/README.md`](frontend/README.md) para instrucciones del frontend.
 
 ## Arquitectura
 
@@ -44,6 +54,17 @@ npm run dev
 ```
 
 La API queda en `http://localhost:6002`.
+
+### Frontend
+
+```bash
+cd frontend
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+La app queda en `http://localhost:3000` (puerto requerido por CORS del backend en producción).
 
 Variables clave en `.env`:
 

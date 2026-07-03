@@ -19,3 +19,19 @@ services:
         sync: false
       - key: NAME_CONTAINER_DB_MONGO
         value: ceiba-mercadoexpress
+      - key: KEEPALIVE_URL
+        value: https://prueba-ceiba-mercadoexpress.onrender.com/api-v1/health
+      - key: KEEPALIVE_INTERVAL_MINUTES
+        value: "10"
+      - key: CORS_ORIGINS
+        value: https://prueba-ceiba-frontend.onrender.com
+
+  - type: web
+    name: prueba-ceiba-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: out
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://prueba-ceiba-mercadoexpress.onrender.com/api-v1
