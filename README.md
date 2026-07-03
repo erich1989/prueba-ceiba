@@ -2,6 +2,13 @@
 
 API REST para gestionar inventario, alertas de stock bajo y órdenes de compra a proveedores.
 
+## Demo desplegada
+
+- **URL:** https://prueba-ceiba-mercadoexpress.onrender.com
+- **Health check:** https://prueba-ceiba-mercadoexpress.onrender.com/api-v1/health
+
+> Nota: el servicio usa el plan gratuito de Render, por lo que la primera petición tras un periodo de inactividad puede tardar ~30-50s en responder mientras el servicio se reactiva.
+
 ## Tecnologías
 
 - Node.js + Express
