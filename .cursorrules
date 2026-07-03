@@ -1,0 +1,108 @@
+# Prueba Técnica — Sistema de Gestión de Inventario (MercadoExpress)
+
+Estas reglas guían al agente al trabajar en este repositorio. Léelas antes de
+proponer o escribir código.
+
+## 0. Comunicación
+
+- Responde **siempre en español**.
+- Sé **breve y directo**: resume, evita explicaciones largas salvo que se pidan.
+
+## 1. Contexto del proyecto
+
+Se construye una **API REST** para gestionar el inventario de una cadena de
+tiendas minoristas: control de stock, alertas automáticas de stock bajo y
+órdenes de compra a proveedores. Es una **prueba de habilidades técnicas**: se
+valora la calidad del diseño, las decisiones arquitectónicas y la comprensión de
+principios de ingeniería de software por encima de la cantidad de código.
+
+## 2. Stack y arquitectura
+
+- **Runtime**: Node.js + Express.
+- **Base de datos**: MongoDB con Mongoose (patrón ya establecido en `backend/`).
+- **Testing**: framework de pruebas (Jest o Vitest). Las pruebas son obligatorias.
+- **Arquitectura por componentes en capas.** Cada componente vive en
+  `backend/src/components/<recurso>/` y separa responsabilidades:
+  - `network.js` — capa HTTP: define rutas Express, valida parámetros básicos
+    (p. ej. `ObjectId`), delega en el controller y responde con el helper
+    `response.success` / `response.error`. No contiene lógica de negocio.
+  - `controller.js` — lógica de negocio y reglas del dominio. Orquesta stores y
+    lanza errores con `error.status` para mapear el código HTTP.
+  - `store.js` — acceso a datos (consultas Mongoose). Sin reglas de negocio.
+  - `model.js` — esquemas Mongoose y validaciones a nivel de modelo.
+- Rutas montadas bajo un prefijo de API (p. ej. `/api-v1/<recurso>`) desde
+  `src/routes/index.js`.
+- Lógica reutilizable transversal en `src/utils/`; tareas programadas en
+  `src/jobs/`.
+
+## 3. Convenciones de código
+
+- Sigue el patrón de las capas existentes; no mezcles responsabilidades entre
+  ellas.
+- Respuestas HTTP consistentes mediante el helper `response` de la capa network.
+- Los errores de negocio se lanzan con un `status` (400/404/409/422, etc.) y un
+  mensaje claro y accionable; nunca filtres detalles internos sensibles.
+- Mensajes de error dirigidos al usuario en español, claros y específicos
+  (indica qué falló y, cuando aplique, cómo corregirlo).
+- Código async/await; maneja siempre los errores en la capa de red con
+  try/catch y `response.error`.
+- No introduzcas dependencias nuevas sin justificación clara.
+
+## 4. Dominio y reglas de negocio (obligatorias)
+
+### Entidades principales
+- **Producto**: `nombre` (3-100), `sku` (único, alfanumérico 6-20), `categoria`,
+  `precio` (> 0), `stockActual` (>= 0, inicia en 0), `stockMinimo` (> 0),
+  `proveedor`.
+- **Movimiento de inventario**: `tipo` (ENTRADA/SALIDA), `cantidad`, `fecha`,
+  `motivo`. **Inmutable**: no se modifica ni elimina.
+- **Alerta**: `tipo` STOCK_BAJO, `estado` (ACTIVA | RESUELTA), asociada a un
+  producto.
+- **Orden de compra**: `producto`, `proveedor`, `cantidadSolicitada`, `estado`
+  (PENDIENTE | APROBADA | RECHAZADA | RECIBIDA).
+
+### Reglas invariantes
+1. **No stock negativo**: una salida que dejaría el stock < 0 se rechaza con un
+   error claro indicando cuánto falta.
+2. **Cantidad mínima de orden**: la cantidad de una orden debe ser **al menos 2×
+   el stock mínimo** del producto.
+3. **Cierre automático de alertas**: cuando el stock sube por encima del mínimo
+   (tras un ajuste o al recibir una orden), la alerta ACTIVA asociada se cierra
+   automáticamente (pasa a RESUELTA).
+4. **Una sola alerta ACTIVA por producto**: nunca dos alertas ACTIVA para el
+   mismo producto.
+5. **Transiciones de orden válidas**: solo se puede aprobar/rechazar una orden
+   **PENDIENTE**; recibir requiere estado **APROBADA**. Rechazar exige un motivo
+   obligatorio (mínimo 10 caracteres). Al recibir (APROBADA → RECIBIDA) se
+   incrementa el stock por la cantidad ordenada y se cierra la alerta asociada.
+6. **Alerta STOCK_BAJO** se crea automáticamente cuando el stock baja **igual o
+   por debajo** del stock mínimo.
+
+### Consultas de inventario (RF-06)
+Soportar filtros por categoría, por proveedor, por estado de alerta (con alerta
+activa) y por rango de stock.
+
+## 5. Pruebas
+
+- Cubre los **flujos de negocio y las reglas invariantes** de la sección 4
+  (no solo CRUD): ajustes de stock, generación/cierre de alertas, ciclo de vida
+  de órdenes y validaciones.
+- Como mínimo pruebas unitarias sobre la lógica de negocio (controllers/utils).
+- Escribe pruebas deterministas y aisladas de servicios externos.
+
+## 6. Seguridad y calidad
+
+- Valida y sanitiza toda entrada del usuario; nunca confíes en el `body`/`query`.
+- No expongas trazas ni datos internos en las respuestas de error.
+- No incluyas secretos en el código; usa variables de entorno (`.env`,
+  documentadas en `.env.example`).
+- Mantén el código legible; comentarios solo para intención o decisiones no
+  obvias, no para narrar el código.
+
+## 7. Entregables
+
+- README con: instrucciones de ejecución local, arquitectura elegida y su
+  justificación, y tecnologías usadas.
+- Datos de referencia (categorías y productos iniciales del enunciado) para
+  pruebas / seed.
+- Tests automatizados que validen los flujos de negocio.

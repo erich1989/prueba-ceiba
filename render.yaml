@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: mercadoexpress-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api-v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLUSTER_DB_MONGO
+        sync: false
+      - key: USER_DB_MONGO
+        sync: false
+      - key: PASSWORD_DB_MONGO
+        sync: false
+      - key: NAME_CONTAINER_DB_MONGO
+        value: ceiba-mercadoexpress
