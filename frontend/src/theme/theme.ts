@@ -25,6 +25,19 @@ const theme = createTheme({
         },
       },
     },
+    MuiTableHead: {
+      styleOverrides: {
+        root: {
+          '& .MuiTableCell-head': {
+            backgroundColor: '#1565c0',
+            color: '#ffffff',
+            fontWeight: 600,
+            whiteSpace: 'nowrap',
+            letterSpacing: '0.02em',
+          },
+        },
+      },
+    },
   },
 });
 
