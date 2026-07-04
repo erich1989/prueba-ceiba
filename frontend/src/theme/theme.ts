@@ -17,6 +17,15 @@ const theme = createTheme({
     h5: { fontWeight: 600 },
   },
   shape: { borderRadius: 10 },
+  components: {
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#ffffff',
+        },
+      },
+    },
+  },
 });
 
 export default theme;
