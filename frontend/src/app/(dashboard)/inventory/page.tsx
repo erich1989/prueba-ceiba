@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Box, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
+import { Box, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, Typography } from '@mui/material';
 import Title from '@/components/atoms/Title';
 import Loader from '@/components/atoms/Loader';
 import FormField from '@/components/molecules/FormField';
@@ -18,6 +18,8 @@ export default function InventoryPage() {
   const [selectedId, setSelectedId] = useState('');
   const [movements, setMovements] = useState<InventoryMovement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const selected = products.find((p) => p._id === selectedId);
 
@@ -48,6 +50,8 @@ export default function InventoryPage() {
   useEffect(() => {
     if (selectedId) loadMovements(selectedId);
   }, [selectedId, loadMovements]);
+
+  useEffect(() => { setPage(0); }, [movements]);
 
   const handleAdjust = async (payload: { tipo: 'ENTRADA' | 'SALIDA'; cantidad: number; motivo: string }) => {
     if (!selectedId) return;
@@ -100,7 +104,7 @@ export default function InventoryPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {movements.map((m) => (
+                {movements.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((m) => (
                   <TableRow key={m._id}>
                     <TableCell>{new Date(m.fecha).toLocaleString()}</TableCell>
                     <TableCell>{m.tipo}</TableCell>
@@ -110,6 +114,17 @@ export default function InventoryPage() {
                 ))}
               </TableBody>
             </Table>
+            <TablePagination
+              component="div"
+              count={movements.length}
+              page={page}
+              onPageChange={(_, newPage) => setPage(newPage)}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+              labelRowsPerPage="Filas por página"
+              labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
+            />
           </Paper>
         </Grid>
       </Grid>

@@ -1,8 +1,9 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import {
   IconButton, Paper, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Tooltip,
+  TableHead, TablePagination, TableRow, Tooltip,
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
@@ -25,6 +26,13 @@ interface PurchaseOrderTableProps {
 }
 
 export default function PurchaseOrderTable({ orders, onApprove, onReject, onReceive }: PurchaseOrderTableProps) {
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  useEffect(() => { setPage(0); }, [orders]);
+
+  const paginated = orders.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
   return (
     <TableContainer component={Paper}>
       <Table size="small">
@@ -38,7 +46,7 @@ export default function PurchaseOrderTable({ orders, onApprove, onReject, onRece
           </TableRow>
         </TableHead>
         <TableBody>
-          {orders.map((order) => (
+          {paginated.map((order) => (
             <TableRow key={order._id} hover>
               <TableCell>{order.producto?.nombre} ({order.producto?.sku})</TableCell>
               <TableCell>{order.proveedor}</TableCell>
@@ -59,6 +67,17 @@ export default function PurchaseOrderTable({ orders, onApprove, onReject, onRece
           ))}
         </TableBody>
       </Table>
+      <TablePagination
+        component="div"
+        count={orders.length}
+        page={page}
+        onPageChange={(_, newPage) => setPage(newPage)}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+        rowsPerPageOptions={[5, 10, 25, 50]}
+        labelRowsPerPage="Filas por página"
+        labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
+      />
     </TableContainer>
   );
 }
