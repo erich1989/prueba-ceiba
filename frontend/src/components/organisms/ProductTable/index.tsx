@@ -7,6 +7,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Chip from '@/components/atoms/Chip';
+import { formatCOP } from '@/lib/format';
 import type { Product } from '@/types';
 
 interface ProductTableProps {
@@ -40,7 +41,7 @@ export default function ProductTable({ products, onEdit, onDelete }: ProductTabl
                 <TableCell>{product.sku}</TableCell>
                 <TableCell>{product.nombre}</TableCell>
                 <TableCell>{product.categoria}</TableCell>
-                <TableCell align="right">${product.precio.toLocaleString()}</TableCell>
+                <TableCell align="right">{formatCOP(product.precio)}</TableCell>
                 <TableCell align="right">{product.stockActual}</TableCell>
                 <TableCell align="right">{product.stockMinimo}</TableCell>
                 <TableCell>{product.proveedor}</TableCell>
